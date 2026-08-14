@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>HealthTwin AI - Create Account</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eaf8ff,
+                    #f5f7ff,
+                    #eefdf8
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+            color: #172033;
+        }
+
+        .page {
+
+            width: 100%;
+
+            max-width: 1050px;
+
+            display: grid;
+
+            grid-template-columns:
+                1.1fr 0.9fr;
+
+            background: rgba(
+                255,
+                255,
+                255,
+                0.9
+            );
+
+            border-radius: 28px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 25px 70px
+                rgba(30, 64, 175, 0.15);
+        }
+
+        /* ================================
+           LEFT PANEL
+        ================================= */
+
+        .hero {
+
+            padding: 55px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #087f8c,
+                    #2563eb
+                );
+
+            color: white;
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .hero::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 270px;
+
+            height: 270px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,0.08);
+
+            top: -100px;
+
+            right: -80px;
+        }
+
+        .hero::after {
+
+            content: "";
+
+            position: absolute;
+
+            width: 190px;
+
+            height: 190px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,0.07);
+
+            bottom: -80px;
+
+            left: -60px;
+        }
+
+        .logo {
+
+            position: relative;
+
+            z-index: 2;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            font-size: 23px;
+
+            font-weight: bold;
+
+            margin-bottom: 65px;
+        }
+
+        .logo-icon {
+
+            width: 48px;
+
+            height: 48px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 14px;
+
+            background:
+                rgba(255,255,255,0.16);
+
+            font-size: 25px;
+        }
+
+        .hero-content {
+
+            position: relative;
+
+            z-index: 2;
+        }
+
+        .hero h1 {
+
+            font-size: 40px;
+
+            line-height: 1.15;
+
+            margin-bottom: 18px;
+        }
+
+        .hero p {
+
+            line-height: 1.7;
+
+            opacity: 0.92;
+
+            font-size: 15px;
+
+            max-width: 470px;
+
+            margin-bottom: 30px;
+        }
+
+        .features {
+
+            display: grid;
+
+            gap: 14px;
+        }
+
+        .feature {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            font-size: 14px;
+        }
+
+        .feature-icon {
+
+            width: 35px;
+
+            height: 35px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background:
+                rgba(255,255,255,0.15);
+        }
+
+        /* ================================
+           REGISTER PANEL
+        ================================= */
+
+        .register-panel {
+
+            padding: 45px 48px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+        }
+
+        .register-panel h2 {
+
+            font-size: 30px;
+
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+
+            color: #64748b;
+
+            font-size: 14px;
+
+            margin-bottom: 27px;
+
+            line-height: 1.5;
+        }
+
+        .form-group {
+
+            margin-bottom: 17px;
+        }
+
+        label {
+
+            display: block;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            margin-bottom: 8px;
+
+            color: #334155;
+        }
+
+        .input-wrapper {
+
+            position: relative;
+        }
+
+        .input-icon {
+
+            position: absolute;
+
+            left: 14px;
+
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            font-size: 16px;
+        }
+
+        .input {
+
+            width: 100%;
+
+            padding:
+                13px
+                14px
+                13px
+                43px;
+
+            border:
+                1px solid #cbd5e1;
+
+            border-radius: 12px;
+
+            outline: none;
+
+            background: #f8fafc;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        .input:focus {
+
+            border-color: #2563eb;
+
+            background: white;
+
+            box-shadow:
+                0 0 0 4px
+                rgba(37,99,235,0.08);
+        }
+
+        .password-toggle {
+
+            position: absolute;
+
+            right: 12px;
+
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            border: none;
+
+            background: transparent;
+
+            cursor: pointer;
+
+            font-size: 16px;
+        }
+
+        .create-btn {
+
+            width: 100%;
+
+            border: none;
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #087f8c
+                );
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            margin-top: 5px;
+
+            transition: 0.2s;
+        }
+
+        .create-btn:hover {
+
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                0 10px 25px
+                rgba(37,99,235,0.25);
+        }
+
+        .login-link {
+
+            text-align: center;
+
+            margin-top: 22px;
+
+            color: #64748b;
+
+            font-size: 13px;
+        }
+
+        .login-link a {
+
+            color: #2563eb;
+
+            font-weight: bold;
+
+            text-decoration: none;
+        }
+
+        .password-info {
+
+            font-size: 11px;
+
+            color: #64748b;
+
+            margin-top: 6px;
+        }
+
+        .security {
+
+            margin-top: 22px;
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            background: #f0fdf4;
+
+            color: #166534;
+
+            text-align: center;
+
+            font-size: 11px;
+        }
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 800px) {
+
+            .page {
+
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+
+                padding: 35px;
+            }
+
+            .logo {
+
+                margin-bottom: 40px;
+            }
+
+            .hero h1 {
+
+                font-size: 32px;
+            }
+
+            .register-panel {
+
+                padding: 38px 30px;
+            }
+
+        }
+
+        @media (max-width: 450px) {
+
+            body {
+
+                padding: 10px;
+            }
+
+            .hero {
+
+                padding: 28px 22px;
+            }
+
+            .hero h1 {
+
+                font-size: 28px;
+            }
+
+            .register-panel {
+
+                padding:
+                    30px 22px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- =========================================
+         HERO
+    ========================================= -->
+
+    <section class="hero">
+
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                🏥
+            </div>
+
+            <span>
+                HealthTwin AI
+            </span>
+
+        </div>
+
+
+        <div class="hero-content">
+
+
+            <h1>
+
+                Build Your
+                <br>
+                Health Profile.
+
+            </h1>
+
+
+            <p>
+
+                Create your HealthTwin account and
+                securely organize your medical reports,
+                health trends and personalized
+                report insights.
+
+            </p>
+
+
+            <div class="features">
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        🔐
+                    </div>
+
+                    <span>
+                        Secure account access
+                    </span>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        📄
+                    </div>
+
+                    <span>
+                        Medical report management
+                    </span>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        📊
+                    </div>
+
+                    <span>
+                        Long-term health tracking
+                    </span>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        🧬
+                    </div>
+
+                    <span>
+                        Digital Health Twin
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+    <!-- =========================================
+         REGISTER
+    ========================================= -->
+
+    <section class="register-panel">
+
+
+        <h2>
+            Create Account 🚀
+        </h2>
+
+
+        <p class="subtitle">
+
+            Create your account to start
+            using HealthTwin AI.
+
+        </p>
+
+
+        <form
+            method="POST"
+            action="/register"
+            id="registerForm"
+        >
+
+
+            <!-- NAME -->
+
+            <div class="form-group">
+
+                <label for="name">
+                    Full Name
+                </label>
+
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon">
+                        👤
+                    </span>
+
+
+                    <input
+                        class="input"
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter your full name"
+                        required
+                        autocomplete="name"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- EMAIL -->
+
+            <div class="form-group">
+
+                <label for="email">
+                    Email Address
+                </label>
+
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon">
+                        ✉️
+                    </span>
+
+
+                    <input
+                        class="input"
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                        autocomplete="email"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- PASSWORD -->
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon">
+                        🔐
+                    </span>
+
+
+                    <input
+                        class="input"
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password"
+                        minlength="6"
+                        required
+                        autocomplete="new-password"
+                    >
+
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        id="togglePassword"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+
+                <div class="password-info">
+
+                    Minimum 6 characters
+
+                </div>
+
+            </div>
+
+
+            <!-- CONFIRM PASSWORD -->
+
+            <div class="form-group">
+
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon">
+                        🔒
+                    </span>
+
+
+                    <input
+                        class="input"
+                        type="password"
+                        id="confirmPassword"
+                        placeholder="Re-enter your password"
+                        minlength="6"
+                        required
+                        autocomplete="new-password"
+                    >
+
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        id="toggleConfirm"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                type="submit"
+                class="create-btn"
+            >
+
+                🚀 Create My Account
+
+            </button>
+
+
+        </form>
+
+
+        <!-- LOGIN -->
+
+        <div class="login-link">
+
+            Already have an account?
+
+            <a href="/">
+                Sign In
+            </a>
+
+        </div>
+
+
+        <div class="security">
+
+            🔒 Your password is securely handled
+            by the HealthTwin backend.
+
+        </div>
+
+
+    </section>
+
+
+</div>
+
+
+<script>
+
+
+    const password =
+        document.getElementById(
+            "password"
+        );
+
+
+    const confirmPassword =
+        document.getElementById(
+            "confirmPassword"
+        );
+
+
+    const togglePassword =
+        document.getElementById(
+            "togglePassword"
+        );
+
+
+    const toggleConfirm =
+        document.getElementById(
+            "toggleConfirm"
+        );
+
+
+    // SHOW / HIDE PASSWORD
+
+    togglePassword.addEventListener(
+
+        "click",
+
+        function() {
+
+            if (
+                password.type === "password"
+            ) {
+
+                password.type =
+                    "text";
+
+                togglePassword.textContent =
+                    "🙈";
+
+            }
+
+            else {
+
+                password.type =
+                    "password";
+
+                togglePassword.textContent =
+                    "👁️";
+
+            }
+
+        }
+
+    );
+
+
+    // SHOW / HIDE CONFIRM PASSWORD
+
+    toggleConfirm.addEventListener(
+
+        "click",
+
+        function() {
+
+            if (
+                confirmPassword.type ===
+                "password"
+            ) {
+
+                confirmPassword.type =
+                    "text";
+
+                toggleConfirm.textContent =
+                    "🙈";
+
+            }
+
+            else {
+
+                confirmPassword.type =
+                    "password";
+
+                toggleConfirm.textContent =
+                    "👁️";
+
+            }
+
+        }
+
+    );
+
+
+    // PASSWORD MATCH CHECK
+
+    document
+        .getElementById("registerForm")
+        .addEventListener(
+
+            "submit",
+
+            function(event) {
+
+                if (
+                    password.value !==
+                    confirmPassword.value
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Passwords do not match."
+                    );
+
+                    confirmPassword.focus();
+
+                }
+
+            }
+
+        );
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>HealthTwin AI - Assistant</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            min-height: 100vh;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef7ff,
+                    #f8fbff
+                );
+
+            padding: 20px;
+
+            color: #172033;
+        }
+
+        .container {
+
+            max-width: 900px;
+
+            margin: auto;
+        }
+
+        .header {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #087f8c,
+                    #2563eb
+                );
+
+            color: white;
+
+            padding: 28px;
+
+            border-radius: 22px 22px 0 0;
+        }
+
+        .header h1 {
+
+            font-size: 28px;
+
+            margin-bottom: 7px;
+        }
+
+        .header p {
+
+            opacity: 0.9;
+
+            font-size: 14px;
+        }
+
+        .chat-box {
+
+            background: white;
+
+            min-height: 500px;
+
+            padding: 22px;
+
+            overflow-y: auto;
+
+            border-left:
+                1px solid #e2e8f0;
+
+            border-right:
+                1px solid #e2e8f0;
+        }
+
+        .message {
+
+            display: flex;
+
+            margin-bottom: 18px;
+        }
+
+        .message.user {
+
+            justify-content: flex-end;
+        }
+
+        .bubble {
+
+            max-width: 75%;
+
+            padding: 14px 17px;
+
+            border-radius: 17px;
+
+            line-height: 1.6;
+
+            font-size: 14px;
+
+            white-space: pre-wrap;
+        }
+
+        .bot .bubble {
+
+            background: #eff6ff;
+
+            color: #172033;
+
+            border-bottom-left-radius: 5px;
+        }
+
+        .user .bubble {
+
+            background: #2563eb;
+
+            color: white;
+
+            border-bottom-right-radius: 5px;
+        }
+
+        .typing {
+
+            display: none;
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            margin-bottom: 12px;
+        }
+
+        .input-area {
+
+            background: white;
+
+            padding: 18px;
+
+            border:
+                1px solid #e2e8f0;
+
+            border-radius: 0 0 22px 22px;
+        }
+
+        .input-row {
+
+            display: flex;
+
+            gap: 10px;
+        }
+
+        #messageInput {
+
+            flex: 1;
+
+            padding: 14px;
+
+            border:
+                1px solid #cbd5e1;
+
+            border-radius: 12px;
+
+            outline: none;
+
+            font-size: 14px;
+        }
+
+        #messageInput:focus {
+
+            border-color: #2563eb;
+        }
+
+        button {
+
+            border: none;
+
+            cursor: pointer;
+
+            border-radius: 12px;
+
+            padding: 13px 17px;
+
+            font-weight: bold;
+        }
+
+        .send-btn {
+
+            background: #2563eb;
+
+            color: white;
+        }
+
+        .mic-btn {
+
+            background: #0f766e;
+
+            color: white;
+
+            min-width: 52px;
+        }
+
+        .mic-btn.listening {
+
+            background: #dc2626;
+        }
+
+        .speak-btn {
+
+            background: #e2e8f0;
+
+            color: #172033;
+
+            margin-top: 8px;
+
+            font-size: 12px;
+
+            padding: 8px 11px;
+        }
+
+        .suggestions {
+
+            display: flex;
+
+            gap: 8px;
+
+            flex-wrap: wrap;
+
+            margin-top: 12px;
+        }
+
+        .suggestion {
+
+            background: #f1f5f9;
+
+            color: #334155;
+
+            font-size: 12px;
+
+            padding: 9px 12px;
+
+            border-radius: 20px;
+
+        }
+
+        .suggestion:hover {
+
+            background: #dbeafe;
+        }
+
+        .status {
+
+            margin-top: 9px;
+
+            font-size: 12px;
+
+            color: #64748b;
+
+            min-height: 18px;
+        }
+
+        .navigation {
+
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 18px;
+        }
+
+        .nav-btn {
+
+            text-decoration: none;
+
+            background: white;
+
+            color: #172033;
+
+            padding: 11px 15px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            border:
+                1px solid #e2e8f0;
+        }
+
+        @media (max-width: 600px) {
+
+            body {
+
+                padding: 10px;
+            }
+
+            .bubble {
+
+                max-width: 88%;
+            }
+
+            .input-row {
+
+                gap: 6px;
+            }
+
+            .send-btn {
+
+                padding: 12px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h1>
+            🤖 HealthTwin AI
+        </h1>
+
+        <p>
+            Hello {{ name }}! Ask questions about
+            your uploaded health report.
+        </p>
+
+    </div>
+
+
+    <!-- CHAT -->
+
+    <div
+        class="chat-box"
+        id="chatBox"
+    >
+
+        <div class="message bot">
+
+            <div class="bubble">
+
+                👋 Hi {{ name }}!
+
+                I can help you understand your
+                latest uploaded report.
+
+                Try asking:
+                • What is my health score?
+                • What is my WBC?
+                • What is my hemoglobin?
+                • Give me a report summary.
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="typing"
+            id="typing"
+        >
+            HealthTwin is thinking...
+        </div>
+
+    </div>
+
+
+    <!-- INPUT -->
+
+    <div class="input-area">
+
+        <div class="input-row">
+
+
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Ask about your report..."
+                autocomplete="off"
+            >
+
+
+            <button
+                class="mic-btn"
+                id="micButton"
+                title="Voice Input"
+            >
+                🎤
+            </button>
+
+
+            <button
+                class="send-btn"
+                id="sendButton"
+            >
+                Send
+            </button>
+
+
+        </div>
+
+
+        <div
+            class="status"
+            id="voiceStatus"
+        ></div>
+
+
+        <div class="suggestions">
+
+
+            <button
+                class="suggestion"
+                onclick="askSuggestion(
+                    'What is my health score?'
+                )"
+            >
+                ❤️ Health Score
+            </button>
+
+
+            <button
+                class="suggestion"
+                onclick="askSuggestion(
+                    'What is my hemoglobin?'
+                )"
+            >
+                🩸 Hemoglobin
+            </button>
+
+
+            <button
+                class="suggestion"
+                onclick="askSuggestion(
+                    'What is my WBC?'
+                )"
+            >
+                🧪 WBC
+            </button>
+
+
+            <button
+                class="suggestion"
+                onclick="askSuggestion(
+                    'Give me a summary of my report.'
+                )"
+            >
+                📋 Summary
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- NAVIGATION -->
+
+    <div class="navigation">
+
+
+        <a
+            href="/dashboard"
+            class="nav-btn"
+        >
+            ← Dashboard
+        </a>
+
+
+        <a
+            href="/upload"
+            class="nav-btn"
+        >
+            📄 Upload
+        </a>
+
+
+        <a
+            href="/history"
+            class="nav-btn"
+        >
+            📋 History
+        </a>
+
+
+        <a
+            href="/health-trend"
+            class="nav-btn"
+        >
+            🧬 Digital Twin
+        </a>
+
+
+        <a
+            href="/logout"
+            class="nav-btn"
+        >
+            Logout
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+    const messageInput =
+        document.getElementById(
+            "messageInput"
+        );
+
+
+    const sendButton =
+        document.getElementById(
+            "sendButton"
+        );
+
+
+    const micButton =
+        document.getElementById(
+            "micButton"
+        );
+
+
+    const chatBox =
+        document.getElementById(
+            "chatBox"
+        );
+
+
+    const typing =
+        document.getElementById(
+            "typing"
+        );
+
+
+    const voiceStatus =
+        document.getElementById(
+            "voiceStatus"
+        );
+
+
+    // =====================================================
+    // ADD MESSAGE
+    // =====================================================
+
+    function addMessage(
+        text,
+        type,
+        allowSpeak = false
+    ) {
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "message " + type;
+
+
+        const bubble =
+            document.createElement(
+                "div"
+            );
+
+        bubble.className =
+            "bubble";
+
+
+        bubble.textContent =
+            text;
+
+
+        message.appendChild(
+            bubble
+        );
+
+
+        if (
+            type === "bot"
+            && allowSpeak
+        ) {
+
+            const speakButton =
+                document.createElement(
+                    "button"
+                );
+
+            speakButton.className =
+                "speak-btn";
+
+            speakButton.textContent =
+                "🔊 Listen";
+
+
+            speakButton.onclick =
+                function() {
+
+                    speakText(text);
+
+                };
+
+
+            bubble.appendChild(
+                document.createElement(
+                    "br"
+                )
+            );
+
+
+            bubble.appendChild(
+                speakButton
+            );
+
+        }
+
+
+        chatBox.insertBefore(
+            message,
+            typing
+        );
+
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+    }
+
+
+    // =====================================================
+    // SEND MESSAGE
+    // =====================================================
+
+    async function sendMessage() {
+
+        const message =
+            messageInput.value.trim();
+
+
+        if (!message) {
+
+            return;
+
+        }
+
+
+        addMessage(
+            message,
+            "user"
+        );
+
+
+        messageInput.value =
+            "";
+
+
+        typing.style.display =
+            "block";
+
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/chat",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body: JSON.stringify({
+
+                            message:
+                                message
+
+                        })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            typing.style.display =
+                "none";
+
+
+            const reply =
+                data.reply
+                ||
+                "Sorry, I could not get a response.";
+
+
+            addMessage(
+                reply,
+                "bot",
+                true
+            );
+
+
+            // Automatically speak local/AI response
+
+            speakText(reply);
+
+
+        }
+
+        catch (error) {
+
+            typing.style.display =
+                "none";
+
+
+            addMessage(
+
+                "Something went wrong while "
+                + "connecting to HealthTwin.",
+
+                "bot"
+
+            );
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // SUGGESTION
+    // =====================================================
+
+    function askSuggestion(
+        text
+    ) {
+
+        messageInput.value =
+            text;
+
+        sendMessage();
+
+    }
+
+
+    // =====================================================
+    // ENTER KEY
+    // =====================================================
+
+    messageInput.addEventListener(
+
+        "keydown",
+
+        function(event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                sendMessage();
+
+            }
+
+        }
+
+    );
+
+
+    // =====================================================
+    // SEND BUTTON
+    // =====================================================
+
+    sendButton.addEventListener(
+
+        "click",
+
+        sendMessage
+
+    );
+
+
+    // =====================================================
+    // TEXT TO SPEECH
+    // =====================================================
+
+    function speakText(
+        text
+    ) {
+
+        if (
+            !("speechSynthesis" in window)
+        ) {
+
+            voiceStatus.textContent =
+                "Text-to-speech is not supported "
+                + "in this browser.";
+
+            return;
+
+        }
+
+
+        window.speechSynthesis.cancel();
+
+
+        const cleanedText =
+            text
+                .replace(
+                    /[*#_]/g,
+                    ""
+                )
+                .replace(
+                    /•/g,
+                    ""
+                );
+
+
+        const speech =
+            new SpeechSynthesisUtterance(
+                cleanedText
+            );
+
+
+        speech.rate =
+            0.95;
+
+
+        speech.pitch =
+            1;
+
+
+        speech.volume =
+            1;
+
+
+        speech.lang =
+            "en-IN";
+
+
+        speech.onstart =
+            function() {
+
+                voiceStatus.textContent =
+                    "🔊 Speaking...";
+
+            };
+
+
+        speech.onend =
+            function() {
+
+                voiceStatus.textContent =
+                    "";
+
+            };
+
+
+        speech.onerror =
+            function() {
+
+                voiceStatus.textContent =
+                    "Voice playback failed.";
+
+            };
+
+
+        window.speechSynthesis.speak(
+            speech
+        );
+
+    }
+
+
+    // =====================================================
+    // SPEECH RECOGNITION
+    // =====================================================
+
+    const SpeechRecognition =
+        window.SpeechRecognition
+        ||
+        window.webkitSpeechRecognition;
+
+
+    let recognition =
+        null;
+
+
+    let isListening =
+        false;
+
+
+    if (SpeechRecognition) {
+
+        recognition =
+            new SpeechRecognition();
+
+
+        recognition.continuous =
+            false;
+
+
+        recognition.interimResults =
+            false;
+
+
+        recognition.lang =
+            "en-IN";
+
+
+        recognition.onstart =
+            function() {
+
+                isListening =
+                    true;
+
+
+                micButton.classList.add(
+                    "listening"
+                );
+
+
+                micButton.textContent =
+                    "⏹";
+
+
+                voiceStatus.textContent =
+                    "🎤 Listening...";
+
+            };
+
+
+        recognition.onresult =
+            function(event) {
+
+                const transcript =
+                    event.results[0][0].transcript;
+
+
+                messageInput.value =
+                    transcript;
+
+
+                voiceStatus.textContent =
+                    "Voice captured ✓";
+
+
+                setTimeout(
+
+                    function() {
+
+                        sendMessage();
+
+                    },
+
+                    300
+
+                );
+
+            };
+
+
+        recognition.onerror =
+            function(event) {
+
+                voiceStatus.textContent =
+                    "Voice error: "
+                    + event.error;
+
+            };
+
+
+        recognition.onend =
+            function() {
+
+                isListening =
+                    false;
+
+
+                micButton.classList.remove(
+                    "listening"
+                );
+
+
+                micButton.textContent =
+                    "🎤";
+
+            };
+
+
+        micButton.addEventListener(
+
+            "click",
+
+            function() {
+
+                if (isListening) {
+
+                    recognition.stop();
+
+                }
+
+                else {
+
+                    recognition.start();
+
+                }
+
+            }
+
+        );
+
+    }
+
+    else {
+
+        micButton.disabled =
+            true;
+
+
+        micButton.title =
+            "Speech recognition is not supported "
+            + "in this browser.";
+
+
+        voiceStatus.textContent =
+            "Voice input is not supported "
+            + "in this browser.";
+
+    }
+
+
+</script>
+
+
+</body>
+
+</html>

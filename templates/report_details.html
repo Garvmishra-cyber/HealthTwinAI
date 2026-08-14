@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>HealthTwin AI - Report Details</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef7ff,
+                    #f8fbff
+                );
+
+            min-height: 100vh;
+
+            padding: 40px 20px;
+
+            color: #172033;
+        }
+
+
+        .container {
+
+            max-width: 1100px;
+
+            margin: auto;
+        }
+
+
+        .header {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #087f8c,
+                    #2563eb
+                );
+
+            color: white;
+
+            padding: 35px;
+
+            border-radius: 22px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 15px 35px
+                rgba(0,0,0,0.12);
+        }
+
+
+        .header h1 {
+
+            font-size: 32px;
+
+            margin-bottom: 10px;
+        }
+
+
+        .header p {
+
+            opacity: 0.9;
+        }
+
+
+        .card {
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 20px;
+
+            margin-bottom: 22px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0,0,0,0.08);
+        }
+
+
+        .card h2 {
+
+            margin-bottom: 20px;
+
+            color: #172033;
+        }
+
+
+        .top-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(250px, 1fr)
+                );
+
+            gap: 20px;
+        }
+
+
+        .score {
+
+            background: #eff6ff;
+
+            border-radius: 15px;
+
+            padding: 25px;
+
+            text-align: center;
+        }
+
+
+        .score h3 {
+
+            color: #64748b;
+
+            margin-bottom: 10px;
+        }
+
+
+        .score-value {
+
+            font-size: 42px;
+
+            font-weight: bold;
+
+            color: #2563eb;
+        }
+
+
+        .risk {
+
+            background: #ecfdf5;
+
+            border-radius: 15px;
+
+            padding: 25px;
+
+            text-align: center;
+        }
+
+
+        .risk h3 {
+
+            color: #64748b;
+
+            margin-bottom: 10px;
+        }
+
+
+        .risk-value {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            color: #047857;
+        }
+
+
+        .parameters {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(200px, 1fr)
+                );
+
+            gap: 15px;
+        }
+
+
+        .parameter {
+
+            background: #f8fafc;
+
+            border: 1px solid #e2e8f0;
+
+            padding: 18px;
+
+            border-radius: 14px;
+        }
+
+
+        .parameter span {
+
+            display: block;
+
+            color: #64748b;
+
+            margin-bottom: 8px;
+
+            font-size: 14px;
+        }
+
+
+        .parameter strong {
+
+            font-size: 21px;
+        }
+
+
+        ul {
+
+            padding-left: 22px;
+        }
+
+
+        li {
+
+            margin-bottom: 10px;
+
+            line-height: 1.5;
+        }
+
+
+        .ocr {
+
+            background: #0f172a;
+
+            color: #e2e8f0;
+
+            padding: 20px;
+
+            border-radius: 14px;
+
+            overflow-x: auto;
+
+            white-space: pre-wrap;
+
+            line-height: 1.5;
+
+            max-height: 450px;
+
+            overflow-y: auto;
+        }
+
+
+        .buttons {
+
+            display: flex;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+
+            margin-top: 25px;
+        }
+
+
+        .btn {
+
+            text-decoration: none;
+
+            padding: 13px 22px;
+
+            border-radius: 12px;
+
+            font-weight: bold;
+
+            display: inline-block;
+        }
+
+
+        .primary {
+
+            background: #2563eb;
+
+            color: white;
+        }
+
+
+        .secondary {
+
+            background: #e2e8f0;
+
+            color: #172033;
+        }
+
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 20px 12px;
+            }
+
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h1>
+            🏥 HealthTwin AI
+        </h1>
+
+        <p>
+            Detailed Medical Report Analysis
+        </p>
+
+    </div>
+
+
+
+    <!-- REPORT INFORMATION -->
+
+    <div class="card">
+
+        <h2>
+            📄 Report Information
+        </h2>
+
+        <p>
+            <strong>File:</strong>
+            {{ report["filename"] }}
+        </p>
+
+        <br>
+
+        <p>
+            <strong>Date:</strong>
+            {{ report["created_at"] }}
+        </p>
+
+    </div>
+
+
+
+    <!-- SCORE -->
+
+    <div class="top-grid">
+
+
+        <div class="score">
+
+            <h3>
+                ❤️ Health Score
+            </h3>
+
+            <div class="score-value">
+
+                {{ report["score"] }}/100
+
+            </div>
+
+        </div>
+
+
+
+        <div class="risk">
+
+            <h3>
+                ⚠️ Risk Level
+            </h3>
+
+            <div class="risk-value">
+
+                {{ report["risk"] }}
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <br>
+
+
+
+    <!-- PARAMETERS -->
+
+    <div class="card">
+
+        <h2>
+            📊 Detected Health Parameters
+        </h2>
+
+
+        {% if parameters %}
+
+        <div class="parameters">
+
+
+            {% for key, value in parameters.items() %}
+
+            <div class="parameter">
+
+                <span>
+                    {{ key }}
+                </span>
+
+                <strong>
+                    {{ value }}
+                </strong>
+
+            </div>
+
+            {% endfor %}
+
+
+        </div>
+
+        {% else %}
+
+        <p>
+            Health parameters were not separately stored
+            for this report.
+        </p>
+
+        {% endif %}
+
+
+    </div>
+
+
+
+    <!-- FINDINGS -->
+
+    <div class="card">
+
+        <h2>
+            🔎 Findings
+        </h2>
+
+
+        {% if findings %}
+
+        <ul>
+
+            {% for finding in findings %}
+
+            <li>
+                {{ finding }}
+            </li>
+
+            {% endfor %}
+
+        </ul>
+
+        {% else %}
+
+        <p>
+            No findings recorded.
+        </p>
+
+        {% endif %}
+
+
+    </div>
+
+
+
+    <!-- RECOMMENDATIONS -->
+
+    <div class="card">
+
+        <h2>
+            💡 Recommendations
+        </h2>
+
+
+        {% if recommendations %}
+
+        <ul>
+
+            {% for recommendation in recommendations %}
+
+            <li>
+                {{ recommendation }}
+            </li>
+
+            {% endfor %}
+
+        </ul>
+
+        {% else %}
+
+        <p>
+            No recommendations recorded.
+        </p>
+
+        {% endif %}
+
+
+    </div>
+
+
+
+    <!-- OCR -->
+
+    <div class="card">
+
+        <h2>
+            📝 OCR Extracted Text
+        </h2>
+
+
+        <div class="ocr">
+
+            {{ report["report_text"] or "OCR text not available." }}
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- BUTTONS -->
+
+    <div class="buttons">
+
+
+        <a
+            href="/history"
+            class="btn secondary"
+        >
+            ← Back to History
+        </a>
+
+
+        <a
+            href="/upload"
+            class="btn primary"
+        >
+            📄 Upload New Report
+        </a>
+
+
+        <a
+            href="/dashboard"
+            class="btn secondary"
+        >
+            🏠 Dashboard
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

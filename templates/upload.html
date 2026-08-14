@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>HealthTwin AI - Upload Report</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #06b6d4,
+                    #2563eb
+                );
+
+            padding: 20px;
+        }
+
+
+        .container {
+
+            width: 100%;
+
+            max-width: 600px;
+
+            background: white;
+
+            border-radius: 24px;
+
+            padding: 40px;
+
+            box-shadow:
+                0 20px 50px
+                rgba(0, 0, 0, 0.20);
+
+            text-align: center;
+        }
+
+
+        .logo {
+
+            font-size: 50px;
+
+            margin-bottom: 10px;
+        }
+
+
+        h1 {
+
+            color: #2563eb;
+
+            margin-bottom: 10px;
+        }
+
+
+        .subtitle {
+
+            color: #64748b;
+
+            margin-bottom: 30px;
+
+            line-height: 1.5;
+        }
+
+
+        .upload-box {
+
+            border: 2px dashed #2563eb;
+
+            border-radius: 18px;
+
+            padding: 35px 20px;
+
+            background: #f8fafc;
+
+            margin-bottom: 25px;
+        }
+
+
+        .upload-icon {
+
+            font-size: 45px;
+
+            margin-bottom: 15px;
+        }
+
+
+        input[type="file"] {
+
+            width: 100%;
+
+            padding: 15px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 10px;
+
+            background: white;
+
+            cursor: pointer;
+        }
+
+
+        .file-info {
+
+            margin-top: 12px;
+
+            color: #64748b;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+
+        button {
+
+            width: 100%;
+
+            border: none;
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #06b6d4
+                );
+
+            color: white;
+
+            font-size: 17px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        button:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 8px 20px
+                rgba(37, 99, 235, 0.30);
+        }
+
+
+        .back {
+
+            display: inline-block;
+
+            margin-top: 20px;
+
+            color: #2563eb;
+
+            text-decoration: none;
+
+            font-weight: bold;
+        }
+
+
+        .back:hover {
+
+            text-decoration: underline;
+        }
+
+
+        .supported {
+
+            margin-top: 20px;
+
+            font-size: 13px;
+
+            color: #64748b;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <div class="logo">
+        🏥
+    </div>
+
+
+    <h1>
+        HealthTwin AI
+    </h1>
+
+
+    <p class="subtitle">
+
+        Upload your medical report and let
+        HealthTwin AI extract and analyze
+        important health parameters.
+
+    </p>
+
+
+    <form
+        action="/upload"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+
+        <div class="upload-box">
+
+
+            <div class="upload-icon">
+                📄
+            </div>
+
+
+            <input
+                type="file"
+                name="report"
+                accept=".pdf,.png,.jpg,.jpeg"
+                required
+            >
+
+
+            <div class="file-info">
+
+                Select a medical report in
+                PDF, PNG, JPG or JPEG format.
+
+            </div>
+
+
+        </div>
+
+
+        <button type="submit">
+
+            🔍 Analyze Medical Report
+
+        </button>
+
+
+    </form>
+
+
+    <div class="supported">
+
+        Supported formats:
+        PDF • PNG • JPG • JPEG
+
+    </div>
+
+
+    <a
+        href="/dashboard"
+        class="back"
+    >
+
+        ← Back to Dashboard
+
+    </a>
+
+
+</div>
+
+
+</body>
+
+</html>

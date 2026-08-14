@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>HealthTwin AI - Digital Twin</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef7ff,
+                    #f8fbff
+                );
+
+            min-height: 100vh;
+
+            color: #172033;
+
+            padding: 25px 15px;
+        }
+
+        .container {
+
+            max-width: 1250px;
+
+            margin: auto;
+        }
+
+        .header {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #087f8c,
+                    #2563eb
+                );
+
+            color: white;
+
+            padding: 35px;
+
+            border-radius: 24px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 15px 35px
+                rgba(0,0,0,0.12);
+        }
+
+        .header h1 {
+
+            font-size: 34px;
+
+            margin-bottom: 10px;
+        }
+
+        .header p {
+
+            opacity: 0.9;
+
+            line-height: 1.6;
+        }
+
+        .summary-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(200px, 1fr)
+                );
+
+            gap: 18px;
+
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+
+            background: white;
+
+            padding: 23px;
+
+            border-radius: 18px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0,0,0,0.07);
+        }
+
+        .summary-icon {
+
+            font-size: 30px;
+
+            margin-bottom: 12px;
+        }
+
+        .summary-label {
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            margin-bottom: 7px;
+        }
+
+        .summary-value {
+
+            font-size: 25px;
+
+            font-weight: bold;
+
+            color: #2563eb;
+        }
+
+        .card {
+
+            background: white;
+
+            padding: 28px;
+
+            border-radius: 20px;
+
+            margin-bottom: 22px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0,0,0,0.07);
+        }
+
+        .card h2 {
+
+            font-size: 22px;
+
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            margin-bottom: 22px;
+        }
+
+        /* SMART INSIGHTS */
+
+        .insights-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(250px, 1fr)
+                );
+
+            gap: 15px;
+        }
+
+        .insight {
+
+            padding: 20px;
+
+            border-radius: 15px;
+
+            background: #f8fafc;
+
+            border:
+                1px solid #e2e8f0;
+        }
+
+        .insight.positive {
+
+            background: #f0fdf4;
+
+            border-color: #bbf7d0;
+        }
+
+        .insight.warning {
+
+            background: #fff7ed;
+
+            border-color: #fed7aa;
+        }
+
+        .insight.info {
+
+            background: #eff6ff;
+
+            border-color: #bfdbfe;
+        }
+
+        .insight h3 {
+
+            font-size: 16px;
+
+            margin-bottom: 8px;
+        }
+
+        .insight p {
+
+            color: #475569;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+        }
+
+        .chart-container {
+
+            position: relative;
+
+            width: 100%;
+
+            height: 340px;
+        }
+
+        canvas {
+
+            width: 100% !important;
+
+            height: 100% !important;
+        }
+
+        .parameter-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(180px, 1fr)
+                );
+
+            gap: 15px;
+        }
+
+        .parameter-card {
+
+            background: #f8fafc;
+
+            border:
+                1px solid #e2e8f0;
+
+            padding: 20px;
+
+            border-radius: 15px;
+        }
+
+        .parameter-name {
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            margin-bottom: 8px;
+        }
+
+        .parameter-value {
+
+            font-size: 23px;
+
+            font-weight: bold;
+
+            color: #2563eb;
+        }
+
+        .timeline {
+
+            display: grid;
+
+            gap: 15px;
+        }
+
+        .report-item {
+
+            border:
+                1px solid #e2e8f0;
+
+            background: #f8fafc;
+
+            padding: 20px;
+
+            border-radius: 15px;
+
+            display: grid;
+
+            grid-template-columns:
+                1.5fr 1fr 1fr;
+
+            gap: 15px;
+
+            align-items: center;
+        }
+
+        .report-name {
+
+            font-weight: bold;
+
+            margin-bottom: 6px;
+
+            word-break: break-word;
+        }
+
+        .report-date {
+
+            color: #64748b;
+
+            font-size: 12px;
+        }
+
+        .report-score {
+
+            font-weight: bold;
+
+            color: #2563eb;
+
+            font-size: 18px;
+        }
+
+        .report-risk {
+
+            font-size: 13px;
+
+            font-weight: bold;
+        }
+
+        .empty {
+
+            background: white;
+
+            padding: 55px 25px;
+
+            text-align: center;
+
+            border-radius: 20px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0,0,0,0.07);
+        }
+
+        .empty-icon {
+
+            font-size: 55px;
+
+            margin-bottom: 15px;
+        }
+
+        .empty h2 {
+
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+
+            color: #64748b;
+
+            line-height: 1.6;
+
+            margin-bottom: 22px;
+        }
+
+        .buttons {
+
+            display: flex;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            margin-top: 25px;
+        }
+
+        .btn {
+
+            text-decoration: none;
+
+            padding: 12px 19px;
+
+            border-radius: 11px;
+
+            font-weight: bold;
+
+            font-size: 14px;
+        }
+
+        .primary {
+
+            background: #2563eb;
+
+            color: white;
+        }
+
+        .secondary {
+
+            background: #e2e8f0;
+
+            color: #172033;
+        }
+
+        .green {
+
+            background: #0f766e;
+
+            color: white;
+        }
+
+        @media (max-width: 700px) {
+
+            body {
+
+                padding:
+                    15px 10px;
+            }
+
+            .header {
+
+                padding: 27px 22px;
+            }
+
+            .header h1 {
+
+                font-size: 27px;
+            }
+
+            .card {
+
+                padding: 21px;
+            }
+
+            .chart-container {
+
+                height: 280px;
+            }
+
+            .report-item {
+
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h1>
+            🧬 Digital Health Twin
+        </h1>
+
+        <p>
+            Track your recorded health parameters,
+            compare reports and discover changes
+            over time.
+        </p>
+
+    </div>
+
+
+    {% if trend_data %}
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary-grid">
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon">
+                ❤️
+            </div>
+
+            <div class="summary-label">
+                Latest Health Score
+            </div>
+
+            <div class="summary-value">
+                {{ trend_data[-1].score }}/100
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon">
+                🩸
+            </div>
+
+            <div class="summary-label">
+                Hemoglobin
+            </div>
+
+            <div class="summary-value">
+                {{ trend_data[-1].hemoglobin }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon">
+                🧪
+            </div>
+
+            <div class="summary-label">
+                WBC
+            </div>
+
+            <div class="summary-value">
+                {{ trend_data[-1].wbc }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon">
+                🧫
+            </div>
+
+            <div class="summary-label">
+                Platelets
+            </div>
+
+            <div class="summary-value">
+                {{ trend_data[-1].platelets }}
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- SMART INSIGHTS -->
+
+    <div class="card">
+
+        <h2>
+            🧠 Smart Health Insights
+        </h2>
+
+        <p class="subtitle">
+            Automatic comparison between your latest
+            and previous recorded reports.
+        </p>
+
+
+        <div class="insights-grid">
+
+
+            {% for insight in insights %}
+
+
+            <div class="insight {{ insight.type }}">
+
+                <h3>
+                    {{ insight.title }}
+                </h3>
+
+                <p>
+                    {{ insight.message }}
+                </p>
+
+            </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+    </div>
+
+
+    <!-- SCORE CHART -->
+
+    <div class="card">
+
+        <h2>
+            ❤️ Health Score Trend
+        </h2>
+
+        <p class="subtitle">
+            Recorded score across your reports.
+        </p>
+
+
+        <div class="chart-container">
+
+            <canvas id="scoreChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- BLOOD CHART -->
+
+    <div class="card">
+
+        <h2>
+            🩸 Blood Parameter Trends
+        </h2>
+
+        <p class="subtitle">
+            Recorded values across your reports.
+        </p>
+
+
+        <div class="chart-container">
+
+            <canvas id="bloodChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- PARAMETERS -->
+
+    <div class="card">
+
+        <h2>
+            📊 Latest Health Parameters
+        </h2>
+
+        <p class="subtitle">
+            Values extracted from your latest report.
+        </p>
+
+
+        <div class="parameter-grid">
+
+
+            <div class="parameter-card">
+
+                <div class="parameter-name">
+                    Hemoglobin
+                </div>
+
+                <div class="parameter-value">
+                    {{ trend_data[-1].hemoglobin }}
+                </div>
+
+            </div>
+
+
+            <div class="parameter-card">
+
+                <div class="parameter-name">
+                    RBC
+                </div>
+
+                <div class="parameter-value">
+                    {{ trend_data[-1].rbc }}
+                </div>
+
+            </div>
+
+
+            <div class="parameter-card">
+
+                <div class="parameter-name">
+                    WBC
+                </div>
+
+                <div class="parameter-value">
+                    {{ trend_data[-1].wbc }}
+                </div>
+
+            </div>
+
+
+            <div class="parameter-card">
+
+                <div class="parameter-name">
+                    Platelets
+                </div>
+
+                <div class="parameter-value">
+                    {{ trend_data[-1].platelets }}
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- TIMELINE -->
+
+    <div class="card">
+
+        <h2>
+            📋 Report Timeline
+        </h2>
+
+        <p class="subtitle">
+            Your reports in chronological order.
+        </p>
+
+
+        <div class="timeline">
+
+
+            {% for report in trend_data|reverse %}
+
+
+            <div class="report-item">
+
+
+                <div>
+
+                    <div class="report-name">
+
+                        📄 {{ report.filename }}
+
+                    </div>
+
+                    <div class="report-date">
+
+                        {{ report.date }}
+
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <div class="report-score">
+
+                        ❤️ {{ report.score }}/100
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-risk">
+
+                    {{ report.risk }}
+
+                </div>
+
+
+            </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+    </div>
+
+
+    {% else %}
+
+
+    <!-- EMPTY -->
+
+    <div class="empty">
+
+        <div class="empty-icon">
+            🧬
+        </div>
+
+        <h2>
+            Your Digital Twin is waiting
+        </h2>
+
+        <p>
+            Upload your first medical report
+            to start tracking your health.
+        </p>
+
+
+        <a
+            href="/upload"
+            class="btn primary"
+        >
+            📄 Upload Report
+        </a>
+
+    </div>
+
+
+    {% endif %}
+
+
+    <!-- NAVIGATION -->
+
+    <div class="buttons">
+
+
+        <a
+            href="/dashboard"
+            class="btn secondary"
+        >
+            ← Dashboard
+        </a>
+
+
+        <a
+            href="/upload"
+            class="btn primary"
+        >
+            📄 Upload Report
+        </a>
+
+
+        <a
+            href="/history"
+            class="btn secondary"
+        >
+            📋 History
+        </a>
+
+
+        <a
+            href="/chatbot"
+            class="btn green"
+        >
+            🤖 AI Assistant
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+    const trendData =
+        {{ trend_data | tojson }};
+
+
+    const labels =
+        trendData.map(
+            item => item.date
+        );
+
+
+    const scores =
+        trendData.map(
+            item => Number(item.score) || 0
+        );
+
+
+    const hemoglobin =
+        trendData.map(
+            item => Number(item.hemoglobin) || 0
+        );
+
+
+    const rbc =
+        trendData.map(
+            item => Number(item.rbc) || 0
+        );
+
+
+    const wbc =
+        trendData.map(
+            item => Number(item.wbc) || 0
+        );
+
+
+    const platelets =
+        trendData.map(
+            item => Number(item.platelets) || 0
+        );
+
+
+    /* SCORE CHART */
+
+    const scoreCanvas =
+        document.getElementById(
+            "scoreChart"
+        );
+
+
+    if (scoreCanvas) {
+
+        new Chart(
+
+            scoreCanvas,
+
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Health Score",
+
+                            data:
+                                scores,
+
+                            tension:
+                                0.3,
+
+                            borderWidth:
+                                3,
+
+                            pointRadius:
+                                5
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        y: {
+
+                            min: 0,
+
+                            max: 100
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+    }
+
+
+    /* BLOOD PARAMETERS */
+
+    const bloodCanvas =
+        document.getElementById(
+            "bloodChart"
+        );
+
+
+    if (bloodCanvas) {
+
+        new Chart(
+
+            bloodCanvas,
+
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Hemoglobin",
+
+                            data:
+                                hemoglobin,
+
+                            tension:
+                                0.3,
+
+                            borderWidth:
+                                2,
+
+                            pointRadius:
+                                4
+
+                        },
+
+                        {
+
+                            label:
+                                "RBC",
+
+                            data:
+                                rbc,
+
+                            tension:
+                                0.3,
+
+                            borderWidth:
+                                2,
+
+                            pointRadius:
+                                4
+
+                        },
+
+                        {
+
+                            label:
+                                "WBC",
+
+                            data:
+                                wbc,
+
+                            tension:
+                                0.3,
+
+                            borderWidth:
+                                2,
+
+                            pointRadius:
+                                4
+
+                        },
+
+                        {
+
+                            label:
+                                "Platelets",
+
+                            data:
+                                platelets,
+
+                            tension:
+                                0.3,
+
+                            borderWidth:
+                                2,
+
+                            pointRadius:
+                                4
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero: true
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
