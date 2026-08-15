@@ -1,7 +1,14 @@
 import sqlite3
+import os
 
 
-DATABASE = "healthtwin.db"
+# ============================================================
+# DATABASE PATH
+# ============================================================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DATABASE = os.path.join(BASE_DIR, "healthtwin.db")
 
 
 # ============================================================
@@ -27,7 +34,6 @@ def init_database():
 
     cursor = conn.cursor()
 
-
     # ========================================================
     # USERS TABLE
     # ========================================================
@@ -44,7 +50,6 @@ def init_database():
             password TEXT NOT NULL
         )
     """)
-
 
     # ========================================================
     # REPORTS TABLE
@@ -83,7 +88,6 @@ def init_database():
         )
     """)
 
-
     # ========================================================
     # CHECK EXISTING REPORT COLUMNS
     # ========================================================
@@ -93,35 +97,36 @@ def init_database():
     )
 
     existing_columns = {
-
         row["name"]
-
         for row in cursor.fetchall()
     }
 
-
     # ========================================================
-    # ADD MISSING COLUMNS
+    # ADD MISSING REPORT COLUMNS
     # ========================================================
 
     required_columns = {
 
-        "user_id":
-            "INTEGER",
+        "user_id": "INTEGER",
 
-        "hemoglobin":
-            "TEXT",
+        "filename": "TEXT",
 
-        "rbc":
-            "TEXT",
+        "hemoglobin": "TEXT",
 
-        "wbc":
-            "TEXT",
+        "rbc": "TEXT",
 
-        "platelets":
-            "TEXT"
+        "wbc": "TEXT",
+
+        "platelets": "TEXT",
+
+        "findings": "TEXT",
+
+        "recommendations": "TEXT",
+
+        "score": "INTEGER",
+
+        "risk": "TEXT"
     }
-
 
     for column, data_type in required_columns.items():
 
@@ -134,9 +139,8 @@ def init_database():
                 """
             )
 
-
     # ========================================================
-    # COMMIT
+    # COMMIT CHANGES
     # ========================================================
 
     conn.commit()
@@ -161,7 +165,6 @@ def save_report(
     conn = get_connection()
 
     cursor = conn.cursor()
-
 
     cursor.execute("""
         INSERT INTO reports
@@ -214,13 +217,11 @@ def save_report(
         risk
     ))
 
-
     conn.commit()
 
     report_id = cursor.lastrowid
 
     conn.close()
-
 
     return report_id
 
@@ -235,7 +236,6 @@ def get_user_reports(user_id):
 
     cursor = conn.cursor()
 
-
     cursor.execute("""
         SELECT *
 
@@ -248,10 +248,15 @@ def get_user_reports(user_id):
         user_id,
     ))
 
-
     reports = cursor.fetchall()
 
     conn.close()
 
-
     return reports
+
+
+# ============================================================
+# INITIALIZE DATABASE AUTOMATICALLY
+# ============================================================
+
+init_database()
