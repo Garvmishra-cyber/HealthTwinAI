@@ -1,8 +1,9 @@
 import os
 import gc
+import re
 
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageOps, ImageFilter
 import fitz
 
 
@@ -28,11 +29,107 @@ else:
 # OCR SETTINGS
 # ============================================================
 
-# Lower than the old 2x rendering to reduce Render memory usage.
 PDF_RENDER_SCALE = 1.5
 
-# OCR page configuration.
+# 6 = uniform block of text
 TESSERACT_CONFIG = "--psm 6"
+
+
+# ============================================================
+# IMAGE PREPROCESSING
+# ============================================================
+
+def preprocess_image(image):
+    """
+    Prepare image for OCR.
+
+    Keeps the original image untouched.
+    """
+
+    processed = None
+
+    try:
+
+        processed = image.convert("RGB")
+
+        # Grayscale
+        processed = ImageOps.grayscale(
+            processed
+        )
+
+        # Slight contrast improvement
+        processed = ImageOps.autocontrast(
+            processed
+        )
+
+        # Light sharpening
+        processed = processed.filter(
+            ImageFilter.SHARPEN
+        )
+
+        return processed
+
+    except Exception as error:
+
+        print(
+            "IMAGE PREPROCESSING ERROR:",
+            error
+        )
+
+        return image
+
+
+# ============================================================
+# CLEAN OCR TEXT
+# ============================================================
+
+def clean_ocr_text(text):
+
+    if not text:
+        return ""
+
+    text = str(text)
+
+    # Normalize common OCR characters
+    replacements = {
+        "\x0c": "\n",
+        "\r\n": "\n",
+        "\r": "\n",
+        "µ": "u",
+        "μ": "u",
+        "×": "x",
+        "–": "-",
+        "—": "-",
+        "−": "-",
+    }
+
+    for old, new in replacements.items():
+
+        text = text.replace(
+            old,
+            new
+        )
+
+    # Remove excessive spaces
+    lines = []
+
+    for line in text.splitlines():
+
+        line = re.sub(
+            r"[ \t]+",
+            " ",
+            line
+        ).strip()
+
+        if line:
+
+            lines.append(
+                line
+            )
+
+    return "\n".join(
+        lines
+    ).strip()
 
 
 # ============================================================
@@ -42,19 +139,119 @@ TESSERACT_CONFIG = "--psm 6"
 def extract_text_from_image(image_path):
 
     image = None
+    processed = None
 
     try:
 
-        image = Image.open(image_path)
+        print(
+            "Opening image..."
+        )
 
-        image = image.convert("RGB")
+        image = Image.open(
+            image_path
+        )
 
-        text = pytesseract.image_to_string(
-            image,
+        print(
+            "IMAGE SIZE:",
+            image.size
+        )
+
+        # ----------------------------------------------------
+        # First OCR pass
+        # Original image
+        # ----------------------------------------------------
+
+        original_text = pytesseract.image_to_string(
+            image.convert("RGB"),
             config=TESSERACT_CONFIG
         )
 
-        return text.strip()
+        original_text = clean_ocr_text(
+            original_text
+        )
+
+        # ----------------------------------------------------
+        # Second OCR pass
+        # Preprocessed image
+        # ----------------------------------------------------
+
+        processed = preprocess_image(
+            image
+        )
+
+        processed_text = pytesseract.image_to_string(
+            processed,
+            config=TESSERACT_CONFIG
+        )
+
+        processed_text = clean_ocr_text(
+            processed_text
+        )
+
+        # ----------------------------------------------------
+        # Choose the better result
+        #
+        # Health reports normally contain useful keywords.
+        # ----------------------------------------------------
+
+        health_keywords = [
+            "hemoglobin",
+            "haemoglobin",
+            "rbc",
+            "wbc",
+            "wec",
+            "platelet",
+            "mch",
+            "mcv",
+            "mchc",
+            "rdw",
+            "hematocrit",
+            "pcv",
+            "glucose",
+            "cholesterol",
+            "triglycerides",
+            "creatinine",
+            "bilirubin",
+            "thyroid",
+            "tsh",
+            "esr",
+            "crp",
+        ]
+
+        original_lower = original_text.lower()
+        processed_lower = processed_text.lower()
+
+        original_score = sum(
+            1
+            for keyword in health_keywords
+            if keyword in original_lower
+        )
+
+        processed_score = sum(
+            1
+            for keyword in health_keywords
+            if keyword in processed_lower
+        )
+
+        if processed_score > original_score:
+
+            final_text = processed_text
+
+        else:
+
+            final_text = original_text
+
+        print(
+            "OCR KEYWORD SCORE:",
+            original_score,
+            processed_score
+        )
+
+        print(
+            "IMAGE OCR SUCCESS"
+        )
+
+        return final_text
 
     except Exception as error:
 
@@ -67,7 +264,14 @@ def extract_text_from_image(image_path):
 
     finally:
 
-        # Explicitly release image memory.
+        if processed is not None:
+
+            try:
+                processed.close()
+
+            except Exception:
+                pass
+
         if image is not None:
 
             try:
@@ -76,11 +280,14 @@ def extract_text_from_image(image_path):
             except Exception:
                 pass
 
+        processed = None
+        image = None
+
         gc.collect()
 
 
 # ============================================================
-# PDF NORMAL TEXT EXTRACTION
+# NORMAL PDF TEXT EXTRACTION
 # ============================================================
 
 def extract_normal_pdf_text(document):
@@ -89,7 +296,9 @@ def extract_normal_pdf_text(document):
 
     try:
 
-        for page_number in range(len(document)):
+        for page_number in range(
+            len(document)
+        ):
 
             page = None
 
@@ -111,7 +320,6 @@ def extract_normal_pdf_text(document):
 
             finally:
 
-                # Release page reference.
                 page = None
 
         return "\n\n".join(
@@ -136,25 +344,28 @@ def extract_normal_pdf_text(document):
 # OCR ONE PDF PAGE
 # ============================================================
 
-def ocr_pdf_page(document, page_number):
+def ocr_pdf_page(
+    document,
+    page_number
+):
 
     page = None
     pix = None
     image = None
+    processed = None
 
     try:
 
-        # ----------------------------------------------------
-        # Load only ONE page
-        # ----------------------------------------------------
+        print(
+            f"Rendering PDF page {page_number + 1}..."
+        )
 
         page = document.load_page(
             page_number
         )
 
         # ----------------------------------------------------
-        # Render at 1.5x instead of 2x
-        # This significantly reduces memory usage.
+        # Render one page only
         # ----------------------------------------------------
 
         pix = page.get_pixmap(
@@ -166,10 +377,6 @@ def ocr_pdf_page(document, page_number):
             alpha=False
         )
 
-        # ----------------------------------------------------
-        # Convert pixmap to PIL image
-        # ----------------------------------------------------
-
         image = Image.frombytes(
             "RGB",
             (
@@ -180,15 +387,25 @@ def ocr_pdf_page(document, page_number):
         )
 
         # ----------------------------------------------------
+        # Preprocess
+        # ----------------------------------------------------
+
+        processed = preprocess_image(
+            image
+        )
+
+        # ----------------------------------------------------
         # OCR
         # ----------------------------------------------------
 
         text = pytesseract.image_to_string(
-            image,
+            processed,
             config=TESSERACT_CONFIG
         )
 
-        return text.strip()
+        return clean_ocr_text(
+            text
+        )
 
     except Exception as error:
 
@@ -201,10 +418,13 @@ def ocr_pdf_page(document, page_number):
 
     finally:
 
-        # ----------------------------------------------------
-        # IMPORTANT:
-        # Explicitly release large objects after EVERY page.
-        # ----------------------------------------------------
+        if processed is not None:
+
+            try:
+                processed.close()
+
+            except Exception:
+                pass
 
         if image is not None:
 
@@ -214,11 +434,11 @@ def ocr_pdf_page(document, page_number):
             except Exception:
                 pass
 
+        processed = None
         image = None
         pix = None
         page = None
 
-        # Force Python garbage collection.
         gc.collect()
 
 
@@ -250,8 +470,7 @@ def extract_text_from_pdf(pdf_path):
         )
 
         # ====================================================
-        # FIRST:
-        # TRY NORMAL PDF TEXT EXTRACTION
+        # FIRST TRY NORMAL TEXT
         # ====================================================
 
         normal_text = extract_normal_pdf_text(
@@ -264,12 +483,12 @@ def extract_text_from_pdf(pdf_path):
                 "PDF TEXT EXTRACTION SUCCESS"
             )
 
-            return normal_text
+            return clean_ocr_text(
+                normal_text
+            )
 
         # ====================================================
-        # SECOND:
         # SCANNED PDF
-        # USE MEMORY-SAFE OCR
         # ====================================================
 
         print(
@@ -277,14 +496,10 @@ def extract_text_from_pdf(pdf_path):
         )
 
         print(
-            "Starting memory-safe OCR..."
+            "Starting PDF OCR..."
         )
 
-        ocr_text = []
-
-        # ----------------------------------------------------
-        # Process ONE page at a time.
-        # ----------------------------------------------------
+        ocr_pages = []
 
         for page_number in range(
             page_count
@@ -294,29 +509,21 @@ def extract_text_from_pdf(pdf_path):
                 f"OCR PAGE {page_number + 1}/{page_count}"
             )
 
-            text = ocr_pdf_page(
+            page_text = ocr_pdf_page(
                 document,
                 page_number
             )
 
-            if text:
+            if page_text:
 
-                ocr_text.append(
-                    text
+                ocr_pages.append(
+                    page_text
                 )
-
-            # ------------------------------------------------
-            # Force cleanup between pages.
-            # ------------------------------------------------
 
             gc.collect()
 
-        # ====================================================
-        # COMBINE OCR TEXT
-        # ====================================================
-
         final_text = "\n\n".join(
-            ocr_text
+            ocr_pages
         ).strip()
 
         if final_text:
@@ -344,10 +551,6 @@ def extract_text_from_pdf(pdf_path):
 
     finally:
 
-        # ----------------------------------------------------
-        # Close PDF document.
-        # ----------------------------------------------------
-
         if document is not None:
 
             try:
@@ -357,10 +560,6 @@ def extract_text_from_pdf(pdf_path):
                 pass
 
         document = None
-
-        # ----------------------------------------------------
-        # Final memory cleanup.
-        # ----------------------------------------------------
 
         gc.collect()
 
@@ -379,7 +578,9 @@ def extract_text(file_path):
 
         return ""
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(
+        file_path
+    ):
 
         print(
             "FILE NOT FOUND:",
@@ -393,6 +594,10 @@ def extract_text(file_path):
     )[1].lower()
 
     print(
+        "\n===================================="
+    )
+
+    print(
         "OCR FILE:",
         file_path
     )
@@ -400,6 +605,10 @@ def extract_text(file_path):
     print(
         "FILE TYPE:",
         extension
+    )
+
+    print(
+        "===================================="
     )
 
     # ========================================================
@@ -430,7 +639,7 @@ def extract_text(file_path):
         )
 
     # ========================================================
-    # UNSUPPORTED FILE
+    # UNSUPPORTED
     # ========================================================
 
     print(
