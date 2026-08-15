@@ -8,6 +8,13 @@ from flask import (
 )
 
 import sqlite3
+
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+except ImportError:
+    psycopg2 = None
+    RealDictCursor = None
 import os
 import json
 import uuid
@@ -34,10 +41,15 @@ app.secret_key = os.getenv(
     "healthtwin-development-secret-key"
 )
 
-DATABASE = os.getenv(
-    "DATABASE_PATH",
-    "healthtwin.db"
-)
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+DATABASE = os.getenv("DATABASE_PATH", "healthtwin.db")
+USE_POSTGRES = bool(DATABASE_URL)
+
+if USE_POSTGRES and psycopg2 is None:
+    raise RuntimeError(
+        "DATABASE_URL is set, but psycopg2 is not installed. "
+        "Add psycopg2-binary to requirements.txt."
+    )
 
 UPLOAD_FOLDER = os.getenv(
     "UPLOAD_FOLDER",
@@ -63,15 +75,41 @@ os.makedirs(
 # DATABASE
 # =========================================================
 
+class PostgresConnection:
+    """Small compatibility wrapper so existing ? placeholders keep working."""
+
+    def __init__(self, url):
+        self.conn = psycopg2.connect(url, cursor_factory=RealDictCursor)
+
+    def execute(self, sql, params=()):
+        sql = sql.replace("?", "%s")
+        cursor = self.conn.cursor()
+        cursor.execute(sql, params)
+        return cursor
+
+    def commit(self):
+        self.conn.commit()
+
+    def rollback(self):
+        self.conn.rollback()
+
+    def close(self):
+        self.conn.close()
+
+
 def get_db():
+    if USE_POSTGRES:
+        return PostgresConnection(DATABASE_URL)
 
-    conn = sqlite3.connect(
-        DATABASE
-    )
-
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
-
     return conn
+
+
+def is_duplicate_error(error):
+    if USE_POSTGRES and psycopg2 is not None:
+        return isinstance(error, psycopg2.errors.UniqueViolation)
+    return isinstance(error, sqlite3.IntegrityError)
 
 
 # =========================================================
@@ -79,109 +117,85 @@ def get_db():
 # =========================================================
 
 def ensure_database():
-
     conn = get_db()
 
-    # -----------------------------------------------------
-    # USERS
-    # -----------------------------------------------------
-
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users (
-
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-            name TEXT NOT NULL,
-
-            email TEXT UNIQUE NOT NULL,
-
-            password TEXT NOT NULL,
-
-            created_at TIMESTAMP
-                DEFAULT CURRENT_TIMESTAMP
-
+    if USE_POSTGRES:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
         )
-        """
-    )
 
-    # -----------------------------------------------------
-    # REPORTS
-    # -----------------------------------------------------
-
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS reports (
-
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-            filename TEXT,
-
-            findings TEXT,
-
-            recommendations TEXT,
-
-            score INTEGER,
-
-            risk TEXT,
-
-            created_at TIMESTAMP
-                DEFAULT CURRENT_TIMESTAMP,
-
-            user_id INTEGER,
-
-            report_text TEXT,
-
-            parameters TEXT
-
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS reports (
+                id SERIAL PRIMARY KEY,
+                filename TEXT,
+                findings TEXT,
+                recommendations TEXT,
+                score INTEGER,
+                risk TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                user_id INTEGER,
+                report_text TEXT,
+                parameters TEXT
+            )
+            """
         )
-        """
-    )
+    else:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
 
-    # -----------------------------------------------------
-    # OLD DATABASE COMPATIBILITY
-    # -----------------------------------------------------
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT,
+                findings TEXT,
+                recommendations TEXT,
+                score INTEGER,
+                risk TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                user_id INTEGER,
+                report_text TEXT,
+                parameters TEXT
+            )
+            """
+        )
 
-    columns = [
-
-        row["name"]
-
-        for row in conn.execute(
-            "PRAGMA table_info(reports)"
-        ).fetchall()
-
-    ]
-
-    required_columns = {
-
-        "user_id": "INTEGER",
-
-        "report_text": "TEXT",
-
-        "parameters": "TEXT"
-
-    }
-
-    for column, data_type in required_columns.items():
-
-        if column not in columns:
-
-            try:
-
-                conn.execute(
-                    f"""
-                    ALTER TABLE reports
-                    ADD COLUMN {column}
-                    {data_type}
-                    """
-                )
-
-            except sqlite3.OperationalError:
-
-                pass
+        columns = [
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(reports)").fetchall()
+        ]
+        for column, data_type in {
+            "user_id": "INTEGER",
+            "report_text": "TEXT",
+            "parameters": "TEXT"
+        }.items():
+            if column not in columns:
+                try:
+                    conn.execute(
+                        f"ALTER TABLE reports ADD COLUMN {column} {data_type}"
+                    )
+                except sqlite3.OperationalError:
+                    pass
 
     conn.commit()
-
     conn.close()
 
 
@@ -754,7 +768,12 @@ def register():
 
             conn.commit()
 
-        except sqlite3.IntegrityError:
+        except Exception as error:
+            if not is_duplicate_error(error):
+                conn.rollback()
+                conn.close()
+                print("REGISTER DATABASE ERROR:", error)
+                return "Registration failed. Please try again.", 500
 
             conn.close()
 
@@ -1009,7 +1028,7 @@ def upload():
                 report_text,
                 parameters
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 original_name,
