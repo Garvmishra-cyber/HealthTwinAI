@@ -263,18 +263,71 @@ def analyze_report(text):
     # --------------------------------------------------------
     # HEMOGLOBIN
     # --------------------------------------------------------
-    # IMPORTANT:
-    # Must require g/dL so MCH 30.1 pg is not detected as Hb.
+    # SAFE FIX:
+    # Keep Hemoglobin extraction isolated so changes here do NOT
+    # affect RBC, WBC, Platelets, HCT/PCV, or red-cell indices.
+    #
+    # OCR reports may write:
+    #   Hemoglobin 14.2 g/dL
+    #   Haemoglobin
+    #   14.2
+    #   g/dL
+    #   HGB 14.2 g/dL
+    #
+    # We still require the Hemoglobin/HGB label and g/dL-style
+    # unit. This prevents MCH/MCHC values from being mistaken
+    # for Hemoglobin.
     # --------------------------------------------------------
 
-    hb = get_value_with_unit(
-        text,
-        r"(?<!mean corp. )"
-        r"(?<!mean corpuscular )"
-        r"\b(?:hemoglobin|haemoglobin)\b"
-        r"(?!\s*\(?\s*MCHC?\s*\)?)",
-        r"g\s*/?\s*d[lI1]"
+    hb = None
+
+    hb_label = (
+        r"(?<![A-Za-z])"
+        r"(?:hemoglobin|haemoglobin|hgb)"
+        r"(?![A-Za-z])"
     )
+
+    hb_unit = r"g\s*(?:/|per)?\s*d[lI1]"
+
+    # First: line-aware OCR extraction.
+    # Handles label/value/unit split across OCR lines.
+    hb_lines = text.splitlines()
+
+    for i, line in enumerate(hb_lines):
+        if re.search(hb_label, line, re.IGNORECASE):
+
+            local_text = line
+
+            if i + 1 < len(hb_lines):
+                local_text += " " + hb_lines[i + 1]
+
+            if i + 2 < len(hb_lines):
+                local_text += " " + hb_lines[i + 2]
+
+            match = re.search(
+                r"(?<!\d)"
+                r"(\d+(?:\.\d+)?)"
+                r"\s*"
+                + hb_unit,
+                local_text,
+                re.IGNORECASE
+            )
+
+            if match:
+                hb = clean_number(match.group(1))
+                break
+
+    # Fallback to the existing strict extractor.
+    if hb is None:
+        hb = get_value_with_unit(
+            text,
+            hb_label,
+            hb_unit
+        )
+
+    # OCR safety guard.
+    if hb is not None and (hb < 1 or hb > 30):
+        hb = None
 
     if hb is not None:
 
@@ -329,6 +382,7 @@ def analyze_report(text):
                     f"({format_number(hb)} g/dL)."
                 )
             )
+
 
     # --------------------------------------------------------
     # RBC
