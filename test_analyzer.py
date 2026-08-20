@@ -2,58 +2,133 @@ from modules.ocr import extract_text
 from modules.analyzer import analyze_report
 
 
-image_path = "uploads/Screenshot 2026-08-14 012525.png"
+# =========================================================
+# TEST MEDICAL REPORT
+# =========================================================
+
+PDF_PATH = r"uploads\243c4a9f-d595-4d32-b211-d2c87a0dc368.pdf"
 
 
-print("\n========================================")
-print("              OCR TEST")
-print("========================================")
+print("\n")
+print("=" * 70)
+print("        HEALTH TWIN AI - FULL REPORT ANALYZER TEST")
+print("=" * 70)
 
-text = extract_text(image_path)
+
+# =========================================================
+# STEP 1 - OCR
+# =========================================================
+
+print("\n[1/2] Extracting text from medical report...\n")
+
+text = extract_text(PDF_PATH)
+
+
+if not text:
+
+    print("❌ OCR returned no text.")
+
+    print("\nCheck the PDF path or OCR configuration.")
+
+    raise SystemExit
+
+
+print("✅ OCR successful.")
+
+print("\n")
+print("-" * 70)
+print("OCR TEXT")
+print("-" * 70)
 
 print(text)
 
-
-print("\n========================================")
-print("           ANALYZER TEST")
-print("========================================")
-
-report = analyze_report(text)
+print("-" * 70)
 
 
-print("\nHEALTH PARAMETERS")
-print("----------------------------------------")
+# =========================================================
+# STEP 2 - ANALYSIS
+# =========================================================
 
-for key, value in report["parameters"].items():
-    print(f"{key}: {value}")
+print("\n[2/2] Analyzing medical report...\n")
 
-
-print("\nFINDINGS")
-print("----------------------------------------")
-
-for item in report["findings"]:
-    print(item)
+result = analyze_report(text)
 
 
-print("\nRECOMMENDATIONS")
-print("----------------------------------------")
+# =========================================================
+# PARAMETERS
+# =========================================================
 
-for item in report["recommendations"]:
-    print(item)
+print("=" * 70)
+print("HEALTH PARAMETERS")
+print("=" * 70)
 
+for name, value in result["parameters"].items():
 
-print("\nHEALTH SCORE")
-print("----------------------------------------")
-
-print(report["score"], "/100")
-
-
-print("\nRISK LEVEL")
-print("----------------------------------------")
-
-print(report["risk"])
+    print(f"{name}: {value}")
 
 
-print("\n========================================")
-print("              TEST COMPLETE")
-print("========================================")
+# =========================================================
+# FINDINGS
+# =========================================================
+
+print("\n")
+print("=" * 70)
+print("FINDINGS")
+print("=" * 70)
+
+for finding in result["findings"]:
+
+    print("•", finding)
+
+
+# =========================================================
+# RECOMMENDATIONS
+# =========================================================
+
+print("\n")
+print("=" * 70)
+print("RECOMMENDATIONS")
+print("=" * 70)
+
+for recommendation in result["recommendations"]:
+
+    print("•", recommendation)
+
+
+# =========================================================
+# SCORE
+# =========================================================
+
+print("\n")
+print("=" * 70)
+print("HEALTH SCORE")
+print("=" * 70)
+
+print(
+    f"Score: {result['score']}/100"
+)
+
+
+# =========================================================
+# RISK
+# =========================================================
+
+print("\n")
+print("=" * 70)
+print("RISK LEVEL")
+print("=" * 70)
+
+print(
+    result["risk"]
+)
+
+
+# =========================================================
+# COMPLETE
+# =========================================================
+
+print("\n")
+print("=" * 70)
+print("            ANALYSIS TEST COMPLETE")
+print("=" * 70)
+print("\n")
